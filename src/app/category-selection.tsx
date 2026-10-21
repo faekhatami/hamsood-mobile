@@ -2,14 +2,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
-    FlatList,
-    Image,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const categories = [
@@ -110,8 +110,7 @@ export default function CategorySelectionScreen() {
 
             <TouchableOpacity
               style={styles.itemBackButton}
-              onPress={() => router.back()}
-              activeOpacity={0.7}
+              activeOpacity={1}
             >
               <Ionicons
                 name="arrow-back"

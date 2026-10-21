@@ -1,14 +1,15 @@
 
 import { useRouter } from "expo-router";
+import { useRef, useState } from "react";
 import {
-  Image,
+  Animated, Image,
   Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 
@@ -76,6 +77,49 @@ function ProductCard({ product }: { product: (typeof products)[number] }) {
 export default function SellerProfile() {
   const router = useRouter();
 
+  const addButtonOpacity = useRef(new Animated.Value(1)).current;
+  const lastScrollY = useRef(0);
+  const isButtonVisible = useRef(true);
+  const [buttonShown, setButtonShown] = useState(true);
+
+  const handleScroll = (event: any) => {
+    const currentY = event.nativeEvent.contentOffset.y;
+    const difference = currentY - lastScrollY.current;
+
+    if (currentY < 10) {
+      if (!isButtonVisible.current) {
+        isButtonVisible.current = true;
+        setButtonShown(true);
+
+        Animated.timing(addButtonOpacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
+    } else if (difference > 5 && isButtonVisible.current) {
+      isButtonVisible.current = false;
+      setButtonShown(false);
+
+      Animated.timing(addButtonOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    } else if (difference < -5 && !isButtonVisible.current) {
+      isButtonVisible.current = true;
+      setButtonShown(true);
+
+      Animated.timing(addButtonOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+
+    lastScrollY.current = currentY;
+  };
+
   return (
     <View style={styles.screen}>
       <StatusBar barStyle="dark-content"  />
@@ -83,6 +127,8 @@ export default function SellerProfile() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -158,17 +204,24 @@ export default function SellerProfile() {
             <ProductCard key={product.id} product={product} />
           ))}
 
-        <TouchableOpacity
-          onPress={() => {
-            router.push("/category-selection");
-          }}
-        >
-          <Text style={styles.addProductText}>
-            ＋ افزودن محصول
-          </Text>
-        </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Animated.View
+        pointerEvents={buttonShown ? "auto" : "none"}
+        style={[
+          styles.floatingAddButton,
+          { opacity: addButtonOpacity },
+        ]}
+      >
+        <TouchableOpacity
+          onPress={() => router.push("/category-selection")}
+          activeOpacity={0.8}
+          style={styles.floatingAddButtonTouch}
+        >
+          <Text style={styles.floatingAddButtonText}>+</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
       {/* Bottom navigation */}
       <View style={styles.bottomNav}>
@@ -429,25 +482,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: "#777777",
   },
-  addProduct: {
-    position: "absolute",
-    right: 14,
-    top: 325,
-    backgroundColor: teal,
-    borderRadius: 9,
-    paddingVertical: 20,
-    paddingHorizontal: 18,
-    elevation: 4,
-  },
-  addProductText: {
-    fontSize: 19,
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    backgroundColor: "#08C4C5",
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    borderRadius: 9,
-  },
   bottomNav: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -472,5 +506,32 @@ const styles = StyleSheet.create({
   },
   selected: {
     color: teal,
+  },
+  floatingAddButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 90,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: teal,
+    elevation: 6,
+    shadowColor: "#000000",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  
+  floatingAddButtonTouch: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  
+  floatingAddButtonText: {
+    color: "#FFFFFF",
+    fontSize: 36,
+    fontWeight: "300",
+    lineHeight: 40,
   },
 });
