@@ -1,4 +1,6 @@
 
+import ProductCard from "@/features/seller/components/ProductCard";
+import { products } from "@/features/seller/data/products";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -15,29 +17,12 @@ import {
 
 const riceImage1 = require("../../assets/images/rice-profile.png")
 const riceImage2 = require("../../assets/images/rice-category.png")
-const riceImage3 = require("../../assets/images/rice-product.jpg")
 const handsImage = require("../../assets/images/teamwork.jpg")
 const tomatoImage = require("../../assets/images/tomato-paste.png")
 
 
 const teal = "#08C4C5";
 
-const products = [
-  {
-    id: "1",
-    name: "برنج کاظمی",
-    image: riceImage3,    
-    price: "۱۵۰,۰۰۰ تومان",
-    time: "ساعت پیش ۲ "
-  },
-  {
-    id: "2",
-    name: "برنج طارم",
-    image: riceImage3,
-    price: "۱۸۰,۰۰۰ تومان",
-    time: "ساعت پیش ۲ "
-  },
-];
 
 const shortcuts = [
   { title: "شرایط همکاری", icon: handsImage  },
@@ -46,33 +31,6 @@ const shortcuts = [
   { title: "طرف قرارداد", icon: "🔗" },
 ];
 
-
-function ProductCard({ product }: { product: (typeof products)[number] }) {
-  return (
-    <View style={styles.productCard}>
-      <View style={styles.productStatus}>
-        <Text style={styles.active}>✓ فعال</Text>
-        <Text style={styles.more}>⋮</Text>
-      </View>
-
-      <Image
-        source={product.image}
-        style={styles.productImage}
-        resizeMode="contain"
-      />
-
-      <Text style={styles.productName}>{product.name}</Text>
-      <Text style={styles.muted}>{product.time}</Text>
-      <Text style={styles.price}>خرده: {product.price}</Text>
-
-      <View style={styles.productActions}>
-        <Text style={styles.actionIcon}>🛒</Text>
-        <Text style={styles.actionIcon}>📍</Text>
-        <Text style={styles.actionIcon}>♡</Text>
-      </View>
-    </View>
-  );
-}
 
 export default function SellerProfile() {
   const router = useRouter();
@@ -423,64 +381,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     paddingHorizontal: 14,
     gap: 12,
-  },
-  productCard: {
-    width: "47%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 17,
-    padding: 10,
-    elevation: 3,
-    shadowColor: "#000000",
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    marginBottom: 10,
-  },
-  productStatus: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  active: {
-    color: teal,
-    fontSize: 14,
-  },
-  more: {
-    fontSize: 25,
-    color: "#999999",
-  },
-  productImage: {
-    width: "100%",
-    height: 190,
-    marginTop: 8,
-  },
-  productName: {
-    fontSize: 19,
-    fontWeight: "bold",
-    color: "#222222",
-    textAlign: "center",
-    marginTop: 12,
-  },
-  muted: {
-    fontSize: 14,
-    color: "#999999",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  price: {
-    fontSize: 12,
-    color: "#333333",
-    textAlign: "right",
-    marginTop: 20,
-  },
-  productActions: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 22,
-  },
-  actionIcon: {
-    fontSize: 22,
-    color: "#777777",
   },
   bottomNav: {
     flexDirection: "row",
