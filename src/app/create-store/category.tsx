@@ -1,5 +1,5 @@
-
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
     Alert,
@@ -26,16 +26,19 @@ export default function CreateStoreCategoryScreen() {
       Alert.alert("انتخاب دسته‌بندی", "لطفاً یک دسته‌بندی انتخاب کنید.");
       return;
     }
-
+  
     const selectedCategory = STORE_CATEGORIES.find(
       (category) => category.id === selectedCategoryId
     );
-
+  
     if (!selectedCategory) return;
-
-    // فعلاً فقط انتخاب را تأیید می‌کنیم.
-    // در مرحله بعد، دسته‌بندی را به مرحله بعدی ایجاد غرفه می‌فرستیم.
-    Alert.alert("دسته‌بندی انتخاب‌شده", selectedCategory.title);
+  
+    router.push({
+      pathname: "/create-store",
+      params: {
+        categoryTitle: selectedCategory.title,
+      },
+    });
   };
 
   return (
