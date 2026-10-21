@@ -16,42 +16,42 @@ const categories = [
   {
     id: "1",
     title: "مواد غذایی و خوراکی",
-    image: require("../assets/images/food.png"),
+    image: require("../../assets/images/food.png"),
   },
   {
     id: "2",
     title: "ابزار و تجهیزات کسب و کار",
-    image: require("../assets/images/tools.png"),
+    image: require("../../assets/images/tools.png"),
   },
   {
     id: "3",
     title: "شوینده و بهداشتی",
-    image: require("../assets/images/cleaning.png"),
+    image: require("../../assets/images/cleaning.png"),
   },
   {
     id: "4",
     title: "لوازم خانه و آشپزخانه",
-    image: require("../assets/images/home.png"),
+    image: require("../../assets/images/home.png"),
   },
   {
     id: "5",
     title: "کشاورزی و دامداری",
-    image: require("../assets/images/farming.png"),
+    image: require("../../assets/images/farming.png"),
   },
   {
     id: "6",
     title: "لوازم آرایشی و مراقبتی",
-    image: require("../assets/images/beauty.png"),
+    image: require("../../assets/images/beauty.png"),
   },
   {
     id: "7",
     title: "کالای دیجیتال",
-    image: require("../assets/images/digital.png"),
+    image: require("../../assets/images/digital.png"),
   },
   {
     id: "8",
     title: "پوشاک",
-    image: require("../assets/images/clothing.png"),
+    image: require("../../assets/images/clothing.png"),
   },
 ];
 

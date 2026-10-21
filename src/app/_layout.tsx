@@ -1,5 +1,9 @@
-
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import {
+  DarkTheme,
+  DefaultTheme,
+  Stack,
+  ThemeProvider,
+} from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 
@@ -11,13 +15,14 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider
+      value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+    >
       <AnimatedSplashOverlay />
+
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="category-selection" />
-        <Stack.Screen name="product-details" />
-        <Stack.Screen name="product-pricing" />
       </Stack>
     </ThemeProvider>
   );

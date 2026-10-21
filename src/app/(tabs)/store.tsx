@@ -1,6 +1,6 @@
 
-import ProductCard from "@/features/seller/components/ProductCard";
-import { products } from "@/features/seller/data/products";
+import ProductCard from "@/features/store/components/ProductCard";
+import { products } from "@/features/store/data/products";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -173,7 +173,7 @@ export default function SellerProfile() {
         ]}
       >
         <TouchableOpacity
-          onPress={() => router.push("/category-selection")}
+          onPress={() => router.push("/add-product/category")}
           activeOpacity={0.8}
           style={styles.floatingAddButtonTouch}
         >
