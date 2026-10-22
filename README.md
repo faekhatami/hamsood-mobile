@@ -1,56 +1,108 @@
-# Welcome to your Expo app 👋
+# Hamsood Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Hamsood is a mobile application built with React Native, Expo, TypeScript, and Expo Router.
 
-## Get started
+## Project Status
 
-1. Install dependencies
+The project is currently under development.
 
-   ```bash
-   npm install
-   ```
+### Store Creation
+- The store creation screens and navigation flow are implemented.
+- Form data is managed through a shared context.
+- A mapper prepares the form data as a backend-friendly payload.
+- Basic client-side validation is implemented.
+- The payload is currently logged to the console for inspection.
 
-2. Start the app
+**Important:** The mobile app is not connected to a real backend API yet. The request/response contract, authentication, and file uploads still need to be coordinated with the backend developer.
 
-   ```bash
-   npx expo start
-   ```
+### Other Flows
+- The store page and add-product flow are preliminary UI flows.
+- They are not yet fully integrated with the application's main business logic or backend.
 
-In the output, you'll find options to open the app in a
+## Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- React Native
+- Expo
+- TypeScript
+- Expo Router
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Prerequisites
 
-## Get a fresh project
+Install the following before running the project:
 
-When you're ready, run:
+- Node.js, using a version compatible with the project's Expo SDK
+- npm
+- Android Studio and an Android emulator, or a compatible physical device
+
+## Getting Started
+
+Clone the repository:
 
 ```bash
-npm run reset-project
+git clone https://github.com/faekhatami/hamsood-mobile.git
+cd hamsood-mobile
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+Install dependencies:
 
-### Other setup steps
+```bash
+npm install
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Start the Expo development server:
 
-## Learn more
+```bash
+npx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Follow the terminal instructions to open the app on a supported device or emulator.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Store Creation Data Flow
 
-## Join the community
+Store creation form data is managed in:
 
-Join our community of developers creating universal apps.
+`src/features/store-creation/store-creation-context.tsx`
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The backend payload mapper is in:
+
+`src/features/store-creation/store-creation.mapper.ts`
+
+The mapper prepares a payload containing:
+
+- `categoryId`
+- `businessName`
+- `username`
+- `description`
+- `province`
+- `county`
+- `licenses` — an array of license type and description objects
+
+UI-only license identifiers are excluded from the payload, and text fields are trimmed before submission.
+
+The current implementation logs the prepared payload instead of sending an HTTP request.
+
+## Backend Integration
+
+Before implementing the API request, coordinate the following:
+
+- API endpoint and HTTP method
+- Final request DTO and field names
+- Category, province, county, and license type identifiers
+- Authentication and store ownership
+- Username validation and uniqueness
+- Success and error response formats
+- Image and document upload requirements
+
+See the repository's GitHub Issues for the current integration discussion.
+
+## Validation
+
+Run the TypeScript check:
+
+```bash
+npx tsc --noEmit
+```
+
+## Repository
+
+https://github.com/faekhatami/hamsood-mobile
