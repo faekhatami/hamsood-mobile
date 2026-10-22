@@ -1,15 +1,15 @@
-
+import { useStoreCreation } from "@/features/store-creation/store-creation-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,25 +19,22 @@ const PROVINCES: Record<string, string[]> = {
   تهران: ["تهران", "شهریار", "ری", "اسلامشهر", "دماوند"],
   اصفهان: ["اصفهان", "کاشان", "خمینی‌شهر", "نجف‌آباد"],
   فارس: ["شیراز", "مرودشت", "کازرون", "جهرم"],
-  خراسان_رضوی: ["مشهد", "نیشابور", "سبزوار", "تربت حیدریه"],
+  "خراسان رضوی": ["مشهد", "نیشابور", "سبزوار", "تربت حیدریه"],
   البرز: ["کرج", "فردیس", "نظرآباد", "ساوجبلاغ"],
 };
 
 type PickerType = "province" | "county";
 
 export default function StoreAreaScreen() {
-  const [province, setProvince] = useState("");
-  const [county, setCounty] = useState("");
+  const { form, updateField } = useStoreCreation();
+
+  const { province, county } = form;
+
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerType, setPickerType] = useState<PickerType>("province");
 
-  const provinceOptions = Object.keys(PROVINCES).map((item) =>
-    item === "خراسان_رضوی" ? "خراسان رضوی" : item
-  );
-
-  const countyOptions = province
-    ? PROVINCES[province === "خراسان رضوی" ? "خراسان_رضوی" : province] ?? []
-    : [];
+  const provinceOptions = Object.keys(PROVINCES);
+  const countyOptions = province ? PROVINCES[province] ?? [] : [];
 
   const openPicker = (type: PickerType) => {
     setPickerType(type);
@@ -46,10 +43,10 @@ export default function StoreAreaScreen() {
 
   const handleSelect = (value: string) => {
     if (pickerType === "province") {
-      setProvince(value);
-      setCounty("");
+      updateField("province", value);
+      updateField("county", "");
     } else {
-      setCounty(value);
+      updateField("county", value);
     }
 
     setPickerVisible(false);
@@ -64,10 +61,7 @@ export default function StoreAreaScreen() {
       return;
     }
 
-    Alert.alert(
-      "محدوده کسب‌وکار",
-      `استان: ${province}\nشهرستان: ${county}\n\nاطلاعات هنوز به سرور ارسال نشده است.`
-    );
+    router.back();
   };
 
   const options =
@@ -75,11 +69,11 @@ export default function StoreAreaScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      {/* نوار بالای ثابت */}
       <View style={styles.header}>
         <Pressable
           onPress={() => router.back()}
           hitSlop={10}
+          accessibilityRole="button"
           accessibilityLabel="بازگشت"
         >
           <Ionicons name="arrow-back" size={24} color="#444444" />
@@ -94,29 +88,25 @@ export default function StoreAreaScreen() {
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
       >
-        {/* انتخاب استان */}
         <Text style={styles.label}>استان</Text>
 
         <Pressable
           style={styles.selectInput}
           onPress={() => openPicker("province")}
+          accessibilityRole="button"
         >
-          <Ionicons
-            name="chevron-down"
-            size={22}
-            color={PRIMARY}
-          />
+          <Ionicons name="chevron-down" size={22} color={PRIMARY} />
+
           <Text
             style={[
               styles.selectText,
               !province && styles.placeholder,
             ]}
           >
-            {province || "لطفا انتخاب کنید..."}
+            {province || "لطفاً انتخاب کنید..."}
           </Text>
         </Pressable>
 
-        {/* انتخاب شهرستان */}
         <Text style={styles.label}>شهرستان</Text>
 
         <Pressable
@@ -126,24 +116,21 @@ export default function StoreAreaScreen() {
           ]}
           disabled={!province}
           onPress={() => openPicker("county")}
+          accessibilityRole="button"
         >
-          <Ionicons
-            name="chevron-down"
-            size={22}
-            color={PRIMARY}
-          />
+          <Ionicons name="chevron-down" size={22} color={PRIMARY} />
+
           <Text
             style={[
               styles.selectText,
               !county && styles.placeholder,
             ]}
           >
-            {county || "لطفا انتخاب کنید..."}
+            {county || "لطفاً انتخاب کنید..."}
           </Text>
         </Pressable>
 
-        {/* محدوده کسب و کار */}
-        <Text style={styles.label}>محدوده کسب و کار</Text>
+        <Text style={styles.label}>محدوده کسب‌وکار</Text>
 
         <View style={styles.mapPlaceholder}>
           <View style={styles.mapRoadHorizontal} />
@@ -175,17 +162,16 @@ export default function StoreAreaScreen() {
         </Text>
       </ScrollView>
 
-      {/* دکمه پایین صفحه */}
       <View style={styles.footer}>
         <Pressable
           style={styles.confirmButton}
           onPress={handleConfirm}
+          accessibilityRole="button"
         >
-          <Text style={styles.confirmButtonText}>تایید</Text>
+          <Text style={styles.confirmButtonText}>تأیید</Text>
         </Pressable>
       </View>
 
-      {/* فهرست انتخاب استان و شهرستان */}
       <Modal
         visible={pickerVisible}
         transparent
@@ -196,7 +182,10 @@ export default function StoreAreaScreen() {
           style={styles.modalBackdrop}
           onPress={() => setPickerVisible(false)}
         >
-          <View style={styles.dropdown}>
+          <Pressable
+            style={styles.dropdown}
+            onPress={(event) => event.stopPropagation()}
+          >
             <Text style={styles.dropdownTitle}>
               {pickerType === "province"
                 ? "انتخاب استان"
@@ -220,7 +209,7 @@ export default function StoreAreaScreen() {
                 </Text>
               )}
             </ScrollView>
-          </View>
+          </Pressable>
         </Pressable>
       </Modal>
     </SafeAreaView>

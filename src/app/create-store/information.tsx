@@ -1,32 +1,34 @@
 
+import { useStoreCreation } from "@/features/store-creation/store-creation-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
 import {
-    Alert,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const PRIMARY = "#05D1D2";
 
 export default function StoreInformationScreen() {
-  const [businessName, setBusinessName] = useState("");
-  const [username, setUsername] = useState("");
-  const [description, setDescription] = useState("");
+  const { form, updateField } = useStoreCreation();
+
+  const { businessName, username, description } = form;
 
   const handleConfirm = () => {
-    Alert.alert(
-      "اطلاعات غرفه",
-      "این بخش هنوز به ذخیره‌سازی اطلاعات متصل نشده است."
-    );
+    if (!businessName.trim()) {
+      Alert.alert("اطلاعات ناقص", "لطفاً نام کسب‌وکار را وارد کنید.");
+      return;
+    }
+  
+    router.back();
   };
-
+  
   return (
     <SafeAreaView
       style={styles.container}
@@ -94,7 +96,7 @@ export default function StoreInformationScreen() {
           <TextInput
             style={styles.input}
             value={businessName}
-            onChangeText={setBusinessName}
+            onChangeText={(value) => updateField("businessName", value)}
             placeholder="نام کسب و کار خود را وارد کنید"
             placeholderTextColor="#AAAAAA"
             maxLength={64}
@@ -119,7 +121,7 @@ export default function StoreInformationScreen() {
               style={styles.usernameTextInput}
               value={username}
               onChangeText={(value) =>
-                setUsername(value.replace(/^@+/, ""))
+                updateField("username", value.replace(/^@+/, ""))
               }
               placeholder="نام کاربری"
               placeholderTextColor="#AAAAAA"
@@ -137,7 +139,7 @@ export default function StoreInformationScreen() {
           <TextInput
             style={[styles.input, styles.descriptionInput]}
             value={description}
-            onChangeText={setDescription}
+            onChangeText={(value) => updateField("description", value)}
             placeholder="درباره کسب و کار خود بنویسید"
             placeholderTextColor="#AAAAAA"
             maxLength={128}

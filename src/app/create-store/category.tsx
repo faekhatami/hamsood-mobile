@@ -1,13 +1,13 @@
+import { useStoreCreation } from "@/features/store-creation/store-creation-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
 import {
-    Alert,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -17,13 +17,13 @@ import { STORE_CATEGORIES } from "@/features/store-creation/data/store-categorie
 const PRIMARY = "#05D1D2";
 
 export default function CreateStoreCategoryScreen() {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null
-  );
+  const { form, updateField } = useStoreCreation();
+
+  const selectedCategoryId = form.categoryId;
 
   const handleConfirm = () => {
     if (!selectedCategoryId) {
-      Alert.alert("انتخاب دسته‌بندی", "لطفاً یک دسته‌بندی انتخاب کنید.");
+      Alert.alert("توجه", "لطفاً دسته‌بندی غرفه را انتخاب کنید.");
       return;
     }
   
@@ -31,11 +31,15 @@ export default function CreateStoreCategoryScreen() {
       (category) => category.id === selectedCategoryId
     );
   
-    if (!selectedCategory) return;
+    if (!selectedCategory) {
+      Alert.alert("خطا", "دسته‌بندی انتخاب‌شده معتبر نیست.");
+      return;
+    }
   
     router.push({
       pathname: "/create-store",
       params: {
+        categoryId: selectedCategory.id,
         categoryTitle: selectedCategory.title,
       },
     });
@@ -90,8 +94,7 @@ export default function CreateStoreCategoryScreen() {
               key={category.id}
               category={category}
               selected={selectedCategoryId === category.id}
-              onSelect={setSelectedCategoryId}
-            />
+              onSelect={(id) => updateField("categoryId", id)}            />
           ))}
         </View>
       </ScrollView>

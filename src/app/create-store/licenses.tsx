@@ -1,16 +1,16 @@
-
+import { useStoreCreation } from "@/features/store-creation/store-creation-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -23,63 +23,71 @@ const LICENSE_TYPES = [
   "سایر موارد",
 ];
 
-type License = {
-  id: number;
-  type: string;
-  description: string;
-};
-
 export default function StoreLicensesScreen() {
-  const [licenses, setLicenses] = useState<License[]>([
-    { id: 1, type: "", description: "" },
-  ]);
-  const [activeLicenseId, setActiveLicenseId] = useState(1);
+  const {
+    form,
+    addLicense,
+    updateLicense,
+    removeLicense,
+  } = useStoreCreation();
+
+  const licenses = form.licenses;
+
+  const [activeLicenseId, setActiveLicenseId] = useState<string>(
+    licenses[0]?.localId ?? ""
+  );
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
-  const updateLicense = (
-    id: number,
-    field: "type" | "description",
-    value: string
-  ) => {
-    setLicenses((current) =>
-      current.map((license) =>
-        license.id === id ? { ...license, [field]: value } : license
-      )
-    );
-  };
-
-  const addLicense = () => {
-    const newId = Date.now();
-
-    setLicenses((current) => [
-      ...current,
-      { id: newId, type: "", description: "" },
-    ]);
-    setActiveLicenseId(newId);
-  };
-
   const handleConfirm = () => {
-    const incomplete = licenses.some(
-      (license) => !license.type
-    );
-
-    if (incomplete) {
-      Alert.alert("اطلاعات ناقص", "لطفاً نوع تمام مجوزها را انتخاب کنید.");
+    if (licenses.length === 0) {
+      Alert.alert("اطلاعات ناقص", "لطفاً حداقل یک مجوز اضافه کنید.");
       return;
     }
 
-    Alert.alert(
-      "مجوزها",
-      "اطلاعات فرم دریافت شده است؛ ذخیره‌سازی و ارسال به سرور در مرحله اتصال بک‌اند انجام می‌شود."
+    const incomplete = licenses.some(
+      (license) => !license.type.trim()
     );
+
+    if (incomplete) {
+      Alert.alert(
+        "اطلاعات ناقص",
+        "لطفاً نوع تمام مجوزها را انتخاب کنید."
+      );
+      return;
+    }
+
+    router.back();
+  };
+
+  const handleAddLicense = () => {
+    addLicense();
+  };
+
+  const handleRemoveLicense = (localId: string) => {
+    removeLicense(localId);
+
+    if (activeLicenseId === localId) {
+      const nextLicense = licenses.find(
+        (license) => license.localId !== localId
+      );
+
+      setActiveLicenseId(nextLicense?.localId ?? "");
+      setDropdownVisible(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={10}>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="بازگشت"
+        >
           <Ionicons name="arrow-back" size={24} color="#444444" />
         </Pressable>
+
         <Text style={styles.headerTitle}>ایجاد غرفه</Text>
       </View>
 
@@ -91,7 +99,7 @@ export default function StoreLicensesScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {licenses.map((license, index) => (
-          <View key={license.id} style={styles.licenseBlock}>
+          <View key={license.localId} style={styles.licenseBlock}>
             {licenses.length > 1 && (
               <View style={styles.licenseHeading}>
                 <Text style={styles.licenseHeadingText}>
@@ -99,11 +107,10 @@ export default function StoreLicensesScreen() {
                 </Text>
 
                 <Pressable
-                  onPress={() =>
-                    setLicenses((current) =>
-                      current.filter((item) => item.id !== license.id)
-                    )
-                  }
+                  onPress={() => handleRemoveLicense(license.localId)}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={`حذف مجوز ${index + 1}`}
                 >
                   <Ionicons
                     name="trash-outline"
@@ -119,22 +126,24 @@ export default function StoreLicensesScreen() {
             <Pressable
               style={styles.selectInput}
               onPress={() => {
-                setActiveLicenseId(license.id);
+                setActiveLicenseId(license.localId);
                 setDropdownVisible(true);
               }}
+              accessibilityRole="button"
             >
               <Ionicons
                 name="chevron-down"
                 size={22}
                 color={PRIMARY}
               />
+
               <Text
                 style={[
                   styles.selectText,
                   !license.type && styles.placeholder,
                 ]}
               >
-                {license.type || "لطفا انتخاب کنید..."}
+                {license.type || "لطفاً انتخاب کنید..."}
               </Text>
             </Pressable>
 
@@ -145,7 +154,7 @@ export default function StoreLicensesScreen() {
               value={license.description}
               onChangeText={(value) =>
                 updateLicense(
-                  license.id,
+                  license.localId,
                   "description",
                   value
                 )
@@ -158,7 +167,9 @@ export default function StoreLicensesScreen() {
               textAlignVertical="top"
             />
 
-            <Text style={styles.counter}>حداکثر 128 کاراکتر</Text>
+            <Text style={styles.counter}>
+              حداکثر 128 کاراکتر
+            </Text>
 
             <Text style={styles.label}>عکس مجوز</Text>
 
@@ -167,15 +178,18 @@ export default function StoreLicensesScreen() {
               onPress={() =>
                 Alert.alert(
                   "افزودن عکس مجوز",
-                  "انتخاب عکس را پس از اضافه کردن قابلیت آپلود پیاده‌سازی می‌کنیم."
+                  "قابلیت انتخاب و آپلود عکس هنوز پیاده‌سازی نشده است."
                 )
               }
+              accessibilityRole="button"
+              accessibilityLabel="افزودن عکس مجوز"
             >
               <Ionicons
                 name="image-outline"
                 size={36}
                 color={PRIMARY}
               />
+
               <View style={styles.addIcon}>
                 <Ionicons name="add" size={16} color={PRIMARY} />
               </View>
@@ -183,17 +197,28 @@ export default function StoreLicensesScreen() {
           </View>
         ))}
 
-        <Pressable style={styles.addLicenseButton} onPress={addLicense}>
+        <Pressable
+          style={styles.addLicenseButton}
+          onPress={handleAddLicense}
+          accessibilityRole="button"
+        >
           <View style={styles.addButtonIcon}>
             <Ionicons name="add" size={19} color="#FFFFFF" />
           </View>
-          <Text style={styles.addLicenseText}>افزودن مجوز جدید</Text>
+
+          <Text style={styles.addLicenseText}>
+            افزودن مجوز جدید
+          </Text>
         </Pressable>
       </ScrollView>
 
       <View style={styles.footer}>
-        <Pressable style={styles.confirmButton} onPress={handleConfirm}>
-          <Text style={styles.confirmButtonText}>تایید</Text>
+        <Pressable
+          style={styles.confirmButton}
+          onPress={handleConfirm}
+          accessibilityRole="button"
+        >
+          <Text style={styles.confirmButtonText}>تأیید</Text>
         </Pressable>
       </View>
 
@@ -207,22 +232,30 @@ export default function StoreLicensesScreen() {
           style={styles.modalBackdrop}
           onPress={() => setDropdownVisible(false)}
         >
-          <View style={styles.dropdown}>
-            <Text style={styles.dropdownTitle}>انتخاب نوع مجوز</Text>
+          <Pressable
+            style={styles.dropdown}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text style={styles.dropdownTitle}>
+              انتخاب نوع مجوز
+            </Text>
 
             {LICENSE_TYPES.map((type) => (
               <Pressable
                 key={type}
                 style={styles.option}
                 onPress={() => {
-                  updateLicense(activeLicenseId, "type", type);
+                  if (activeLicenseId) {
+                    updateLicense(activeLicenseId, "type", type);
+                  }
+
                   setDropdownVisible(false);
                 }}
               >
                 <Text style={styles.optionText}>{type}</Text>
               </Pressable>
             ))}
-          </View>
+          </Pressable>
         </Pressable>
       </Modal>
     </SafeAreaView>
@@ -238,7 +271,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  headerTitle: { fontSize: 18, fontWeight: "600", color: "#222222" },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#222222",
+  },
   divider: { height: 1, backgroundColor: "#E5E5E5" },
   content: { flex: 1 },
   contentContainer: { padding: 20, paddingBottom: 28 },
@@ -249,7 +286,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  licenseHeadingText: { fontSize: 15, fontWeight: "600", color: "#444444" },
+  licenseHeadingText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#444444",
+  },
   label: {
     fontSize: 15,
     fontWeight: "500",
@@ -332,7 +373,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  addLicenseText: { color: PRIMARY, fontSize: 15, fontWeight: "500" },
+  addLicenseText: {
+    color: PRIMARY,
+    fontSize: 15,
+    fontWeight: "500",
+  },
   footer: {
     paddingHorizontal: 20,
     paddingTop: 12,
@@ -347,7 +392,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  confirmButtonText: { fontSize: 16, fontWeight: "600", color: "#FFFFFF" },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
   modalBackdrop: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -372,5 +421,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#EEEEEE",
   },
-  optionText: { textAlign: "right", fontSize: 14, color: "#333333" },
+  optionText: {
+    textAlign: "right",
+    fontSize: 14,
+    color: "#333333",
+  },
 });

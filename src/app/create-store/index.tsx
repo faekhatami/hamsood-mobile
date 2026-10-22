@@ -1,28 +1,98 @@
-
+import { useStoreCreation } from "@/features/store-creation/store-creation-context";
+import { mapStoreFormToPayload } from "@/features/store-creation/store-creation.mapper";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import {
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const PRIMARY = "#05D1D2";
 
 const SECTIONS = [
-  { id: "information", title: "اطلاعات غرفه *" },
-  { id: "licenses", title: "مجوز ها *" },
-  { id: "introduction", title: "معرفی *" },
-  { id: "area", title: "محدوده *" },
-];
+  { id: "information", title: "اطلاعات غرفه *", enabled: true },
+  { id: "licenses", title: "مجوزها *", enabled: true },
+  { id: "introduction", title: "معرفی *", enabled: false },
+  { id: "area", title: "محدوده *", enabled: true },
+] as const;
 
 export default function CreateStoreScreen() {
-  const { categoryTitle } = useLocalSearchParams<{
-    categoryTitle: string;
+  const { form } = useStoreCreation();
+  const { categoryId, categoryTitle } = useLocalSearchParams<{
+    categoryId?: string;
+    categoryTitle?: string;
   }>();
+
+  const handleSectionPress = (sectionId: string) => {
+    switch (sectionId) {
+      case "information":
+        router.push("/create-store/information");
+        break;
+
+      case "licenses":
+        router.push("/create-store/licenses");
+        break;
+
+      case "area":
+        router.push("/create-store/area");
+        break;
+
+      case "introduction":
+        // این بخش فعلاً غیرفعال است.
+        break;
+    }
+  };
+
+  
+  const handleCreateStore = () => {
+    const payload = mapStoreFormToPayload(form);
+
+    const missingFields: string[] = [];
+
+    if (!payload.categoryId) {
+      missingFields.push("دسته‌بندی غرفه");
+    }
+
+    if (!payload.businessName) {
+      missingFields.push("نام کسب‌وکار");
+    }
+
+    if (!payload.province || !payload.county) {
+      missingFields.push("محدوده فعالیت");
+    }
+
+    if (payload.licenses.length === 0) {
+      missingFields.push("حداقل یک مجوز");
+    }
+
+    if (payload.licenses.some((license) => !license.type)) {
+      missingFields.push("نوع مجوزها");
+    }
+
+    if (missingFields.length > 0) {
+      Alert.alert(
+        "اطلاعات ناقص است",
+        `لطفاً این موارد را تکمیل کنید:\n${missingFields.join("\n")}`
+      );
+      return;
+    }
+
+    console.log(
+      "CREATE STORE PAYLOAD:",
+      JSON.stringify(payload, null, 2)
+    );
+
+    Alert.alert(
+      "آماده‌سازی اطلاعات",
+      "داده‌های غرفه آماده شده‌اند. برای مشاهده خروجی کامل، ترمینال Expo را بررسی کنید."
+    );
+  };
+
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -30,6 +100,7 @@ export default function CreateStoreScreen() {
         <Pressable
           onPress={() => router.back()}
           hitSlop={10}
+          accessibilityRole="button"
           accessibilityLabel="بازگشت"
         >
           <Ionicons name="arrow-back" size={24} color="#444444" />
@@ -43,53 +114,65 @@ export default function CreateStoreScreen() {
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.categoryLabel}>دسته‌بندی انتخاب‌شده</Text>
+        <Text style={styles.categoryLabel}>
+          دسته‌بندی انتخاب‌شده
+        </Text>
 
         <View style={styles.categoryCard}>
           <Text style={styles.categoryTitle}>
             {categoryTitle || "دسته‌بندی انتخاب نشده"}
           </Text>
+
           <Ionicons
             name="checkmark-circle"
             size={24}
-            color={PRIMARY}
+            color={categoryId ? PRIMARY : "#AAAAAA"}
           />
         </View>
 
         <View style={styles.sections}>
-        {SECTIONS.map((section) => (
+          {SECTIONS.map((section) => (
             <Pressable
-                key={section.id}
-                style={styles.sectionRow}
-                onPress={() => {
-                    if (section.id === "information") {
-                      router.push("/create-store/information");
-                    } else if (section.id === "licenses") {
-                      router.push("/create-store/licenses");
-                    } else if (section.id === "area") {
-                      router.push("/create-store/area");
-                    }
-                  }}
+              key={section.id}
+              style={[
+                styles.sectionRow,
+                !section.enabled && styles.disabledSection,
+              ]}
+              disabled={!section.enabled}
+              onPress={() => handleSectionPress(section.id)}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !section.enabled }}
             >
-                <Text style={styles.sectionTitle}>{section.title}</Text>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  !section.enabled && styles.disabledSectionTitle,
+                ]}
+              >
+                {section.title}
+              </Text>
 
+              {section.enabled ? (
                 <Ionicons
-                    name="pencil-outline"
-                    size={21}
-                    color="#666666"
+                  name="pencil-outline"
+                  size={21}
+                  color="#666666"
                 />
+              ) : (
+                <Text style={styles.comingSoon}>به‌زودی</Text>
+              )}
             </Pressable>
-        ))}
+          ))}
         </View>
       </ScrollView>
 
       <View style={styles.footer}>
         <Pressable
           style={styles.confirmButton}
-          onPress={() => {
-            // اتصال مراحل بعدی را در ادامه پیاده‌سازی می‌کنیم.
-          }}
+          onPress={handleCreateStore}
+          accessibilityRole="button"
         >
           <Text style={styles.confirmButtonText}>ایجاد غرفه</Text>
         </Pressable>
@@ -124,6 +207,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
+    paddingBottom: 28,
   },
   categoryLabel: {
     fontSize: 15,
@@ -164,6 +248,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "#333333",
+  },
+  disabledSection: {
+    backgroundColor: "#F8F8F8",
+    borderColor: "#EEEEEE",
+  },
+  disabledSectionTitle: {
+    color: "#999999",
+  },
+  comingSoon: {
+    fontSize: 11,
+    color: "#999999",
   },
   footer: {
     paddingHorizontal: 20,
